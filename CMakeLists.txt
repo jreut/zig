@@ -426,7 +426,7 @@ else()
 endif()
 
 set(BUILD_LIBSTAGE2_ARGS "build-lib"
-    "src-self-hosted/stage2.zig"
+    "../src-self-hosted/stage2.zig"
     -target "${ZIG_TARGET_TRIPLE}"
     -mcpu=baseline
     --name zigstage2
@@ -445,14 +445,14 @@ if("${ZIG_TARGET_TRIPLE}" STREQUAL "native")
       COMMAND zig0 ${BUILD_LIBSTAGE2_ARGS}
       DEPENDS zig0
       BYPRODUCTS "${LIBSTAGE2}"
-      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build"
   )
   set(ZIG_EXECUTABLE "${zig_BINARY_DIR}/zig")
 else()
   add_custom_target(zig_build_libstage2 ALL
       COMMAND "${ZIG_EXECUTABLE}" ${BUILD_LIBSTAGE2_ARGS}
       BYPRODUCTS "${LIBSTAGE2}"
-      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build"
   )
 endif()
 

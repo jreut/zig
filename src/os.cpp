@@ -1582,6 +1582,17 @@ Error os_self_exe_path(Buf *out_path) {
     }
     buf_resize(out_path, cb - 1);
     return ErrorNone;
+#elif defined(ZIG_OS_OPENBSD)
+    buf_resize(out_path, PATH_MAX);
+    int mib[3] = { CTL_KERN, KERN_PROC_CWD, getpid() };
+    size_t cb = PATH_MAX;
+    if (sysctl(mib, 3, buf_ptr(out_path), &cb, nullptr, 0) != 0) {
+        return ErrorUnexpected;
+    }
+    buf_resize(out_path, cb - 1);
+    buf_append_str(out_path, "/");
+    buf_append_str(out_path, getprogname());
+    return ErrorNone;
 #endif
     return ErrorFileNotFound;
 }
