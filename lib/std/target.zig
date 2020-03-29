@@ -331,6 +331,7 @@ pub const Target = struct {
         coreclr,
         simulator,
         macabi,
+        openbsd,
 
         pub fn default(arch: Cpu.Arch, target_os: Os) Abi {
             if (arch.isWasm()) {
@@ -361,6 +362,7 @@ pub const Target = struct {
                 .other,
                 => return .eabi,
                 .openbsd,
+                => return .openbsd,
                 .macosx,
                 .freebsd,
                 .ios,

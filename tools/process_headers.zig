@@ -218,6 +218,14 @@ const musl_targets = [_]LibCTarget{
     },
 };
 
+const openbsd_targets = [_]LibCTarget{
+    LibCTarget{
+        .name = "TODO",
+        .arch = MultiArch{ .specific = .x86_64 },
+        .abi = MultiAbi{ .specific = Abi.openbsd },
+    },
+};
+
 const DestTarget = struct {
     arch: MultiArch,
     os: OsTag,
@@ -254,6 +262,7 @@ const PathTable = std.StringHashMap(*TargetToHash);
 const LibCVendor = enum {
     musl,
     glibc,
+    openbsd
 };
 
 pub fn main() !void {
@@ -295,6 +304,8 @@ pub fn main() !void {
         LibCVendor.musl
     else if (std.mem.eql(u8, abi_name, "glibc"))
         LibCVendor.glibc
+    else if (std.mem.eql(u8, abi_name, "openbsd"))
+        LibCVendor.openbsd
     else {
         std.debug.warn("unrecognized C ABI: {}\n", .{abi_name});
         usageAndExit(args[0]);
@@ -306,6 +317,7 @@ pub fn main() !void {
     switch (vendor) {
         .musl => libc_targets = &musl_targets,
         .glibc => libc_targets = &glibc_targets,
+        .openbsd => libc_targets = &openbsd_targets,
     }
 
     var path_table = PathTable.init(allocator);
@@ -321,8 +333,13 @@ pub fn main() !void {
             .abi = switch (vendor) {
                 .musl => .musl,
                 .glibc => libc_target.abi.specific,
+                .openbsd => libc_target.abi.specific,
             },
-            .os = .linux,
+            .os = switch (vendor) {
+                .musl => .linux,
+                .glibc => .linux,
+                .openbsd => .openbsd,
+            },
         };
         search: for (search_paths.toSliceConst()) |search_path| {
             var sub_path: []const []const u8 = undefined;
@@ -332,6 +349,9 @@ pub fn main() !void {
                 },
                 .glibc => {
                     sub_path = &[_][]const u8{ search_path, libc_target.name, "usr", "include" };
+                },
+                .openbsd => {
+                    sub_path = &[_][]const u8{ search_path, "usr", "include" };
                 },
             }
             const target_include_dir = try std.fs.path.join(allocator, sub_path);
@@ -457,6 +477,6 @@ fn usageAndExit(arg0: []const u8) noreturn {
     std.debug.warn("--search-path can be used any number of times.\n", .{});
     std.debug.warn("    subdirectories of search paths look like, e.g. x86_64-linux-gnu\n", .{});
     std.debug.warn("--out is a dir that will be created, and populated with the results\n", .{});
-    std.debug.warn("--abi is either musl or glibc\n", .{});
+    std.debug.warn("--abi is either musl, glibc or openbsd\n", .{});
     std.process.exit(1);
 }
