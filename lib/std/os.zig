@@ -28,6 +28,7 @@ pub const darwin = @import("os/darwin.zig");
 pub const dragonfly = @import("os/dragonfly.zig");
 pub const freebsd = @import("os/freebsd.zig");
 pub const netbsd = @import("os/netbsd.zig");
+pub const openbsd = @import("os/openbsd.zig");
 pub const linux = @import("os/linux.zig");
 pub const uefi = @import("os/uefi.zig");
 pub const wasi = @import("os/wasi.zig");
@@ -42,6 +43,7 @@ test "" {
     _ = freebsd;
     _ = linux;
     _ = netbsd;
+    _ = openbsd;
     _ = uefi;
     _ = wasi;
     _ = windows;
@@ -62,6 +64,7 @@ else switch (builtin.os.tag) {
     .linux => linux,
     .netbsd => netbsd,
     .dragonfly => dragonfly,
+    .openbsd => openbsd,
     .wasi => wasi,
     .windows => windows,
     else => struct {},
